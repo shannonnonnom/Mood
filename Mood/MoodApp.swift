@@ -8,10 +8,10 @@
 import SwiftUI
 
 @main
-struct MoodApp: App {
+struct MoodSketchApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView() // ← 替換 ContentView
         }
     }
 }

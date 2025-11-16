@@ -16,6 +16,21 @@
 			path = Mood;
 			sourceTree = "<group>";
 		};
+		7C46B5282EC96985000D4C61 /* ViewModels */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		7C46B52D2EC969E1000D4C61 /* Views */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Views;
+			sourceTree = "<group>";
+		};
+		7C46B54F2EC96CE9000D4C61 /* Utilities */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +48,9 @@
 			isa = PBXGroup;
 			children = (
 				7C46B5172EC967D3000D4C61 /* Mood */,
+				7C46B5282EC96985000D4C61 /* ViewModels */,
+				7C46B52D2EC969E1000D4C61 /* Views */,
+				7C46B54F2EC96CE9000D4C61 /* Utilities */,
 				7C46B5162EC967D3000D4C61 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +80,9 @@
 			);
 			fileSystemSynchronizedGroups = (
 				7C46B5172EC967D3000D4C61 /* Mood */,
+				7C46B5282EC96985000D4C61 /* ViewModels */,
+				7C46B52D2EC969E1000D4C61 /* Views */,
+				7C46B54F2EC96CE9000D4C61 /* Utilities */,
 			);
 			name = Mood;
 			packageProductDependencies = (
@@ -94,6 +115,8 @@
 			);
 			mainGroup = 7C46B50C2EC967D3000D4C61;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7C46B5162EC967D3000D4C61 /* Products */;
 			projectDirPath = "";
