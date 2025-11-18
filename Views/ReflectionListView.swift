@@ -13,27 +13,65 @@ struct ReflectionListView: View {
     @State private var selectedRecord: DailyEmotionRecord?
 
     var body: some View {
-        NavigationView {
-            List(dataManager.recentRecords) { record in
-                Button(action: {
-                    // Always fetch the freshest copy before presenting
-                    let fresh = dataManager.dailyRecord(for: record.date)
-                    selectedRecord = fresh
-                    showDetail = true
-                }) {
-                    HStack {
-                        Text(record.dateString)
-                        Spacer()
-                        if let topEmotion = record.emotionPercentages.max(by: { $0.value < $1.value }),
-                           topEmotion.value > 0 {
-                            Text("\(topEmotion.key.rawValue.capitalized): \(Int(topEmotion.value))%")
-                                .foregroundColor(topEmotion.key.color)
-                                .font(.caption)
+        ZStack {
+            // 背景圖層（改為在此檔案中設定）
+            Group {
+                if UIImage(named: "CalendarBackground-2") != nil {
+                    Image("CalendarBackground-2")
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+                } else {
+                    // 資產找不到時的醒目 fallback，方便偵錯
+                    Color.red.ignoresSafeArea()
+                }
+            }
+
+            // 可讀性遮罩（可調整或移除）
+            Rectangle()
+                .fill(Color.black.opacity(0.12))
+                .ignoresSafeArea()
+
+            // 主要內容
+            NavigationView {
+                List(dataManager.recentRecords) { record in
+                    Button(action: {
+                        // Always fetch the freshest copy before presenting
+                        let fresh = dataManager.dailyRecord(for: record.date)
+                        selectedRecord = fresh
+                        showDetail = true
+                    }) {
+                        HStack {
+                            Text(record.dateString)
+                            Spacer()
+                            HStack(spacing: 6) {
+                                // 依 EmotionType 固定順序，挑出當天有紀錄 (> 0) 的情緒，顯示顏色小圓點
+                                ForEach(EmotionType.allCases.filter { (record.emotionPercentages[$0] ?? 0) > 0 }, id: \.self) { emotion in
+                                    Circle()
+                                        .fill(emotion.color)
+                                        .frame(width: 10, height: 10)
+                                        .accessibilityLabel(Text(emotion.rawValue.capitalized))
+                                }
+                            }
                         }
                     }
                 }
+                .navigationTitle("Reflections")
+                // 隱藏列表的預設背景，讓底圖透出
+                .scrollContentBackground(.hidden)
+                .background(Color.clear)
+                .onAppear {
+                    // 讓導航欄透明，避免覆蓋背景
+                    let appearance = UINavigationBarAppearance()
+                    appearance.configureWithTransparentBackground()
+                    UINavigationBar.appearance().standardAppearance = appearance
+                    UINavigationBar.appearance().scrollEdgeAppearance = appearance
+
+                    // Debug：檢查資產是否存在
+                    print("CalendarBackground-2:", UIImage(named: "CalendarBackground-2") as Any)
+                }
             }
-            .navigationTitle("Reflections")
+            .background(Color.clear)
         }
         .sheet(isPresented: $showDetail) {
             if let record = selectedRecord {

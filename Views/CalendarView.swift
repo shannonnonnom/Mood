@@ -20,129 +20,152 @@ struct CalendarView: View {
     private let weekSymbols = Calendar.current.shortWeekdaySymbols // ["Sun","Mon",...]
 
     var body: some View {
-        NavigationView {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    // Page 1: Today 快速填寫（滿版）
-                    VStack(spacing: 16) {
-                        Spacer()
+        ZStack {
+            // 背景圖層（Calendar 首頁底圖）
+            Image("CalendarBackground-1")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
 
-                        Text("Quick Entry")
-                            .font(.headline)
-                            .padding(.top, 8)
+            // 可讀性遮罩（可依需求調整或移除）
+            Rectangle()
+                .fill(Color.black.opacity(0.12))
+                .ignoresSafeArea()
 
-                        Button(action: {
-                            selectedDate = Date()
-                            showDailySheet = true
-                        }) {
-                            Text("Record Mood for Today")
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
-                                .shadow(radius: 3)
-                        }
-                        .padding(.horizontal)
-
-                        Button {
-                            withAnimation(.easeInOut) {
-                                proxy.scrollTo("CalendarSection", anchor: .top)
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Text("Choose another day")
-                                Image(systemName: "arrow.down")
-                            }
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.orange)
-                            .padding(.top, 8)
-                        }
-
-                        Spacer()
-                    }
-                    .frame(minHeight: UIScreen.main.bounds.height * 0.85) // 幾乎滿版
-                    .frame(maxWidth: .infinity)
-                    .id("TopSection")
-
-                    // Page 2: 月曆（移至頂部）
-                    VStack(spacing: 16) {
-                        // 月份切換列
-                        HStack {
-                            Button {
-                                changeMonth(by: -1)
-                            } label: {
-                                Image(systemName: "chevron.left")
-                                    .font(.headline)
-                            }
+            NavigationView {
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        // Page 1: Today 快速填寫（滿版）
+                        VStack(spacing: 16) {
                             Spacer()
-                            Text(titleForMonth(currentMonth))
-                                .font(.title3).bold()
-                            Spacer()
-                            Button {
-                                changeMonth(by: 1)
-                            } label: {
-                                Image(systemName: "chevron.right")
-                                    .font(.headline)
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 8)
 
-                        // 週標題
-                        HStack {
-                            ForEach(weekSymbols, id: \.self) { symbol in
-                                Text(symbol)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                            Text("Quick Entry")
+                                .font(.headline)
+                                .padding(.top, 8)
+
+                            Button(action: {
+                                selectedDate = Date()
+                                showDailySheet = true
+                            }) {
+                                Text("Record Mood for Today")
+                                    .padding()
                                     .frame(maxWidth: .infinity)
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(12)
+                                    .shadow(radius: 3)
                             }
-                        }
-                        .padding(.horizontal, 6)
+                            .padding(.horizontal)
 
-                        // 月曆網格
-                        LazyVGrid(columns: columns, spacing: 8) {
-                            ForEach(daysForMonth(currentMonth), id: \.self) { day in
-                                DayCellView(
-                                    date: day,
-                                    month: currentMonth,
-                                    hasRecord: hasRecord(on: day),
-                                    isToday: Calendar.current.isDateInToday(day)
-                                )
-                                .onTapGesture {
-                                    guard isInSameMonth(day, as: currentMonth) else { return }
-                                    selectedDate = day
-                                    showDailySheet = true
+                            Button {
+                                withAnimation(.easeInOut) {
+                                    proxy.scrollTo("CalendarSection", anchor: .top)
+                                }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Text("Choose another day")
+                                    Image(systemName: "arrow.down")
+                                }
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundColor(.orange)
+                                .padding(.top, 8)
+                            }
+
+                            Spacer()
+                        }
+                        .frame(minHeight: UIScreen.main.bounds.height * 0.85) // 幾乎滿版
+                        .frame(maxWidth: .infinity)
+                        .id("TopSection")
+
+                        // Page 2: 月曆（移至頂部）
+                        VStack(spacing: 16) {
+                            // 月份切換列
+                            HStack {
+                                Button {
+                                    changeMonth(by: -1)
+                                } label: {
+                                    Image(systemName: "chevron.left")
+                                        .font(.headline)
+                                }
+                                Spacer()
+                                Text(titleForMonth(currentMonth))
+                                    .font(.title3).bold()
+                                Spacer()
+                                Button {
+                                    changeMonth(by: 1)
+                                } label: {
+                                    Image(systemName: "chevron.right")
+                                        .font(.headline)
                                 }
                             }
-                        }
-                        .padding(.horizontal, 6)
+                            .padding(.horizontal)
+                            .padding(.top, 8)
 
-                        // 返回頂部
-                        Button {
-                            withAnimation(.easeInOut) {
-                                proxy.scrollTo("TopSection", anchor: .top)
+                            // 週標題
+                            HStack {
+                                ForEach(weekSymbols, id: \.self) { symbol in
+                                    Text(symbol)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .frame(maxWidth: .infinity)
+                                }
                             }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "arrow.up")
-                                Text("Back to Today quick entry")
-                            }
-                            .font(.footnote.weight(.semibold))
-                            .foregroundColor(.blue)
-                            .padding(.vertical, 8)
-                        }
+                            .padding(.horizontal, 6)
 
-                        Spacer(minLength: 8)
+                            // 月曆網格
+                            LazyVGrid(columns: columns, spacing: 8) {
+                                ForEach(daysForMonth(currentMonth), id: \.self) { day in
+                                    DayCellView(
+                                        date: day,
+                                        month: currentMonth,
+                                        hasRecord: hasRecord(on: day),
+                                        isToday: Calendar.current.isDateInToday(day)
+                                    )
+                                    .onTapGesture {
+                                        guard isInSameMonth(day, as: currentMonth) else { return }
+                                        selectedDate = day
+                                        showDailySheet = true
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 6)
+
+                            // 返回頂部
+                            Button {
+                                withAnimation(.easeInOut) {
+                                    proxy.scrollTo("TopSection", anchor: .top)
+                                }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "arrow.up")
+                                    Text("Back to Today quick entry")
+                                }
+                                .font(.footnote.weight(.semibold))
+                                .foregroundColor(.blue)
+                                .padding(.vertical, 8)
+                            }
+
+                            Spacer(minLength: 8)
+                        }
+                        .id("CalendarSection")
+                        .frame(minHeight: UIScreen.main.bounds.height * 0.85) // 保持與第一頁高度一致的視覺連貫
                     }
-                    .id("CalendarSection")
-                    .frame(minHeight: UIScreen.main.bounds.height * 0.85) // 保持與第一頁高度一致的視覺連貫
-                }
-                .navigationTitle("Calendar")
-                .onAppear {
-                    currentMonth = monthStart(for: currentMonth)
+                    // 隱藏 ScrollView 預設背景
+                    .scrollContentBackground(.hidden)
+                    .background(Color.clear)
+                    .navigationTitle("Calendar")
+                    .onAppear {
+                        currentMonth = monthStart(for: currentMonth)
+                        // 清除導航欄背景，讓底圖透出
+                        let appearance = UINavigationBarAppearance()
+                        appearance.configureWithTransparentBackground()
+                        UINavigationBar.appearance().standardAppearance = appearance
+                        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+                    }
                 }
             }
+            // 讓 NavigationView 背景透明
+            .background(Color.clear)
         }
         .sheet(isPresented: $showDailySheet) {
             DailyMoodSheetView(date: selectedDate)
@@ -198,6 +221,7 @@ struct CalendarView: View {
             }
         }
 
+        // 將本月日期加入
         days.append(contentsOf: monthDays)
 
         // 補滿到 6 週（42 格），讓格子高度穩定
@@ -273,6 +297,7 @@ struct DailyMoodSheetView: View {
 
     @State private var dailyRecord: DailyEmotionRecord
     @State private var showAlert = false
+    @State private var showConfirm = false
     @Environment(\.dismiss) private var dismiss
 
     init(date: Date) {
@@ -281,59 +306,77 @@ struct DailyMoodSheetView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                Text("Record Your Mood")
-                    .font(.headline)
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text("Record Your Mood")
+                        .font(.headline)
 
-                ForEach(EmotionType.allCases, id: \.self) { emotion in
-                    VStack {
-                        HStack {
-                            Text(emotion.rawValue.capitalized)
-                            Spacer()
-                            Text("\(Int(dailyRecord.emotionPercentages[emotion]!))%")
-                                .foregroundColor(.gray)
+                    ForEach(EmotionType.allCases, id: \.self) { emotion in
+                        VStack {
+                            HStack {
+                                Text(emotion.rawValue.capitalized)
+                                Spacer()
+                                Text("\(Int(dailyRecord.emotionPercentages[emotion]!))%")
+                                    .foregroundColor(.gray)
+                            }
+                            Slider(
+                                value: Binding(
+                                    get: { dailyRecord.emotionPercentages[emotion]! },
+                                    set: { dailyRecord.emotionPercentages[emotion]! = $0 }
+                                ),
+                                in: 0...100
+                            )
+                            .accentColor(emotion.color)
+                            .animation(.easeInOut(duration: 0.3), value: dailyRecord.emotionPercentages[emotion])
                         }
-                        Slider(
-                            value: Binding(
-                                get: { dailyRecord.emotionPercentages[emotion]! },
-                                set: { dailyRecord.emotionPercentages[emotion]! = $0 }
-                            ),
-                            in: 0...100
-                        )
-                        .accentColor(emotion.color)
-                        .animation(.easeInOut(duration: 0.3), value: dailyRecord.emotionPercentages[emotion])
+                        .padding(.horizontal)
+                    }
+
+                    TextEditor(text: $dailyRecord.notes)
+                        .frame(height: 100)
+                        .border(Color.gray)
+                        .padding(.horizontal)
+
+                    Toggle("Private", isOn: $dailyRecord.isPrivate)
+                        .padding(.horizontal)
+
+                    Button(action: saveRecord) {
+                        Text("Save")
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .shadow(radius: 3)
                     }
                     .padding(.horizontal)
+                    .alert("You haven't set any mood!", isPresented: $showAlert) {
+                        Button("OK", role: .cancel) {}
+                    }
+                    // 確認提示
+                    .alert(isPresented: $showConfirm) {
+                        AlertHelper.confirmAlert(
+                            title: "Saved",
+                            message: "Your mood has been saved.",
+                            confirmAction: {
+                                dismiss()
+                            }
+                        )
+                    }
                 }
-
-                TextEditor(text: $dailyRecord.notes)
-                    .frame(height: 100)
-                    .border(Color.gray)
-                    .padding(.horizontal)
-
-                Toggle("Private", isOn: $dailyRecord.isPrivate)
-                    .padding(.horizontal)
-
-                Button(action: saveRecord) {
-                    Text("Save")
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .shadow(radius: 3)
-                }
-                .padding(.horizontal)
-                .alert("You haven't set any mood!", isPresented: $showAlert) {
-                    Button("OK", role: .cancel) {}
+                .padding(.vertical)
+            }
+            .onAppear {
+                // 確保載入該日期的最新資料
+                dailyRecord = dataManager.dailyRecord(for: date)
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
                 }
             }
-            .padding(.vertical)
-        }
-        .onAppear {
-            // 確保載入該日期的最新資料
-            dailyRecord = dataManager.dailyRecord(for: date)
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 
@@ -342,7 +385,8 @@ struct DailyMoodSheetView: View {
             showAlert = true
         } else {
             dataManager.save(record: dailyRecord)
-            dismiss()
+            // 顯示確認視窗，點擊確認後關閉
+            showConfirm = true
         }
     }
 }
