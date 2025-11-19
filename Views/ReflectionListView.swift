@@ -15,17 +15,7 @@ struct ReflectionListView: View {
     var body: some View {
         ZStack {
             // 背景圖層（改為在此檔案中設定）
-            Group {
-                if UIImage(named: "CalendarBackground-2") != nil {
-                    Image("CalendarBackground-2")
-                        .resizable()
-                        .scaledToFill()
-                        .ignoresSafeArea()
-                } else {
-                    // 資產找不到時的醒目 fallback，方便偵錯
-                    Color.red.ignoresSafeArea()
-                }
-            }
+            
 
             // 可讀性遮罩（可調整或移除）
             Rectangle()
@@ -66,9 +56,6 @@ struct ReflectionListView: View {
                     appearance.configureWithTransparentBackground()
                     UINavigationBar.appearance().standardAppearance = appearance
                     UINavigationBar.appearance().scrollEdgeAppearance = appearance
-
-                    // Debug：檢查資產是否存在
-                    print("CalendarBackground-2:", UIImage(named: "CalendarBackground-2") as Any)
                 }
             }
             .background(Color.clear)

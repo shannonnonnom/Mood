@@ -7,10 +7,8 @@
 
 import SwiftUI
 
-// 假設已經有 EmotionDataManager & DailyEmotionRecord 定義
-
 struct CalendarView: View {
-    @State private var currentMonth: Date = Date() // 顯示中的月份（正規化到月初）
+    @State private var currentMonth: Date = Date()
     @State private var selectedDate = Date()
     @State private var showDailySheet = false
 
@@ -21,142 +19,170 @@ struct CalendarView: View {
 
     var body: some View {
         ZStack {
-            // 背景圖層（Calendar 首頁底圖）
-            Image("CalendarBackground-1")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-
-            // 可讀性遮罩（可依需求調整或移除）
-            Rectangle()
-                .fill(Color.black.opacity(0.12))
-                .ignoresSafeArea()
-
             NavigationView {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        // Page 1: Today 快速填寫（滿版）
-                        VStack(spacing: 16) {
-                            Spacer()
+                        
+                        ZStack {
+                            Image("CalendarBackground-1")
+                                .resizable()
+                                .scaledToFill()
+                                .ignoresSafeArea()
+                                .overlay(
+                                    Color.white.opacity(0.28).ignoresSafeArea()
+                                )
 
-                            Text("Quick Entry")
-                                .font(.headline)
-                                .padding(.top, 8)
+                            VStack(spacing: 24) {
+                                Spacer(minLength: 60)
 
-                            Button(action: {
-                                selectedDate = Date()
-                                showDailySheet = true
-                            }) {
-                                Text("Record Mood for Today")
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(12)
-                                    .shadow(radius: 3)
-                            }
-                            .padding(.horizontal)
-
-                            Button {
-                                withAnimation(.easeInOut) {
-                                    proxy.scrollTo("CalendarSection", anchor: .top)
+                                // 置中顯示且按鈕不再撐滿寬度
+                                HStack {
+                                    Spacer()
+                                    Button(action: {
+                                        selectedDate = Date()
+                                        showDailySheet = true
+                                    }) {
+                                        Text("Record Mood for Today")
+                                            .font(.title3.weight(.semibold))
+                                            .padding(.horizontal, 28)
+                                            .padding(.vertical, 16)
+                                            .frame(minWidth: 220, minHeight: 54)
+                                            .background(Color(red: 250/255, green: 192/255, blue: 61/255))
+                                            .opacity(0.9)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(14)
+                                            .shadow(radius: 6)
+                                    }
+                                    .contentShape(Rectangle())
+                                    Spacer()
                                 }
-                            } label: {
-                                HStack(spacing: 6) {
-                                    Text("Choose another day")
-                                    Image(systemName: "arrow.down")
-                                }
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundColor(.orange)
-                                .padding(.top, 8)
-                            }
+                                .padding(.horizontal)
 
-                            Spacer()
+                                Button {
+                                    withAnimation(.easeInOut) {
+                                        proxy.scrollTo("CalendarSection", anchor: .top)
+                                    }
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Text("Choose another day")
+                                        Image(systemName: "arrow.down")
+                                    }
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundColor(.orange)
+                                }
+                                .contentShape(Rectangle())
+
+                                Spacer()
+                            }
+                            .frame(minHeight: UIScreen.main.bounds.height * 0.85) // 幾乎滿版
+                            .frame(maxWidth: .infinity)
                         }
-                        .frame(minHeight: UIScreen.main.bounds.height * 0.85) // 幾乎滿版
-                        .frame(maxWidth: .infinity)
                         .id("TopSection")
 
-                        // Page 2: 月曆（移至頂部）
-                        VStack(spacing: 16) {
-                            // 月份切換列
-                            HStack {
-                                Button {
-                                    changeMonth(by: -1)
-                                } label: {
-                                    Image(systemName: "chevron.left")
-                                        .font(.headline)
-                                }
-                                Spacer()
-                                Text(titleForMonth(currentMonth))
-                                    .font(.title3).bold()
-                                Spacer()
-                                Button {
-                                    changeMonth(by: 1)
-                                } label: {
-                                    Image(systemName: "chevron.right")
-                                        .font(.headline)
-                                }
-                            }
-                            .padding(.horizontal)
-                            .padding(.top, 8)
+                        // Page 2: 月曆（置中並放大）- 使用 CalendarBackground-2
+                        ZStack {
+                            Image("CalendarBackground-2")
+                                .resizable()
+                                .scaledToFill()
+                                .ignoresSafeArea()
+                                .overlay(
+                                    Color.white.opacity(0.28).ignoresSafeArea()
+                                )
 
-                            // 週標題
-                            HStack {
-                                ForEach(weekSymbols, id: \.self) { symbol in
-                                    Text(symbol)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .frame(maxWidth: .infinity)
-                                }
-                            }
-                            .padding(.horizontal, 6)
+                            VStack {
+                                Spacer(minLength: 20)
 
-                            // 月曆網格
-                            LazyVGrid(columns: columns, spacing: 8) {
-                                ForEach(daysForMonth(currentMonth), id: \.self) { day in
-                                    DayCellView(
-                                        date: day,
-                                        month: currentMonth,
-                                        hasRecord: hasRecord(on: day),
-                                        isToday: Calendar.current.isDateInToday(day)
-                                    )
-                                    .onTapGesture {
-                                        guard isInSameMonth(day, as: currentMonth) else { return }
-                                        selectedDate = day
-                                        showDailySheet = true
+                                VStack(spacing: 16) {
+                                    // 月份切換列
+                                    HStack {
+                                        Button {
+                                            changeMonth(by: -1)
+                                        } label: {
+                                            Image(systemName: "chevron.left")
+                                                .font(.headline)
+                                        }
+                                        Spacer()
+                                        Text(titleForMonth(currentMonth))
+                                            .font(.title2).bold()
+                                        Spacer()
+                                        Button {
+                                            changeMonth(by: 1)
+                                        } label: {
+                                            Image(systemName: "chevron.right")
+                                                .font(.headline)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.top, 8)
+
+                                    // 週標題
+                                    HStack {
+                                        ForEach(weekSymbols, id: \.self) { symbol in
+                                            Text(symbol)
+                                                .font(.callout)
+                                                .foregroundColor(.secondary)
+                                                .frame(maxWidth: .infinity)
+                                        }
+                                    }
+                                    .padding(.horizontal, 6)
+
+                                    // 月曆網格（加大 spacing）
+                                    LazyVGrid(columns: columns, spacing: 12) {
+                                        ForEach(daysForMonth(currentMonth), id: \.self) { day in
+                                            DayCellView(
+                                                date: day,
+                                                month: currentMonth,
+                                                hasRecord: hasRecord(on: day),
+                                                isToday: Calendar.current.isDateInToday(day),
+                                                largeStyle: true
+                                            )
+                                            .onTapGesture {
+                                                guard isInSameMonth(day, as: currentMonth) else { return }
+                                                selectedDate = day
+                                                showDailySheet = true
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 6)
+
+                                    // 返回頂部
+                                    Button {
+                                        withAnimation(.easeInOut) {
+                                            proxy.scrollTo("TopSection", anchor: .top)
+                                        }
+                                    } label: {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "arrow.up")
+                                            Text("Back to Today quick entry")
+                                        }
+                                        .font(.footnote.weight(.semibold))
+                                        .foregroundColor(.blue)
+                                        .padding(.vertical, 8)
                                     }
                                 }
-                            }
-                            .padding(.horizontal, 6)
 
-                            // 返回頂部
-                            Button {
-                                withAnimation(.easeInOut) {
-                                    proxy.scrollTo("TopSection", anchor: .top)
-                                }
-                            } label: {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "arrow.up")
-                                    Text("Back to Today quick entry")
-                                }
-                                .font(.footnote.weight(.semibold))
-                                .foregroundColor(.blue)
-                                .padding(.vertical, 8)
+                                Spacer(minLength: 20)
                             }
-
-                            Spacer(minLength: 8)
+                            .frame(minHeight: UIScreen.main.bounds.height * 0.85)
+                            .frame(maxWidth: .infinity)
                         }
                         .id("CalendarSection")
-                        .frame(minHeight: UIScreen.main.bounds.height * 0.85) // 保持與第一頁高度一致的視覺連貫
                     }
                     // 隱藏 ScrollView 預設背景
                     .scrollContentBackground(.hidden)
-                    .background(Color.clear)
+                    // 用 -1 當整個 ScrollView 的底層背景，補滿導航標題下的空白
+                    .background(
+                        Image("CalendarBackground-1")
+                            .resizable()
+                            .scaledToFill()
+                            .ignoresSafeArea()
+                            .overlay(
+                                Color.white.opacity(0.28).ignoresSafeArea()
+                            )
+                    )
                     .navigationTitle("Calendar")
                     .onAppear {
                         currentMonth = monthStart(for: currentMonth)
-                        // 清除導航欄背景，讓底圖透出
                         let appearance = UINavigationBarAppearance()
                         appearance.configureWithTransparentBackground()
                         UINavigationBar.appearance().standardAppearance = appearance
@@ -164,7 +190,6 @@ struct CalendarView: View {
                     }
                 }
             }
-            // 讓 NavigationView 背景透明
             .background(Color.clear)
         }
         .sheet(isPresented: $showDailySheet) {
@@ -203,15 +228,12 @@ struct CalendarView: View {
             let firstWeekday = cal.dateComponents([.weekday], from: startOfMonth).weekday
         else { return [] }
 
-        // 計算前置空格（以系統 firstWeekday 對齊）
         let leadingEmpty = (firstWeekday - cal.firstWeekday + 7) % 7
 
-        // 本月所有日期
         let monthDays: [Date] = range.compactMap { day -> Date? in
             cal.date(byAdding: DateComponents(day: day - 1), to: startOfMonth)
         }
 
-        // 前置補齊（顯示上個月尾巴的日期，作為禁用狀態）
         var days: [Date] = []
         if leadingEmpty > 0 {
             for i in 1...leadingEmpty {
@@ -221,10 +243,8 @@ struct CalendarView: View {
             }
         }
 
-        // 將本月日期加入
         days.append(contentsOf: monthDays)
 
-        // 補滿到 6 週（42 格），讓格子高度穩定
         while days.count % 7 != 0 {
             if let last = days.last,
                let next = cal.date(byAdding: .day, value: 1, to: last) {
@@ -253,33 +273,33 @@ private struct DayCellView: View {
     let month: Date
     let hasRecord: Bool
     let isToday: Bool
+    var largeStyle: Bool = false
 
     var body: some View {
         let inMonth = Calendar.current.isDate(date, equalTo: month, toGranularity: .month)
         let day = Calendar.current.component(.day, from: date)
 
-        VStack(spacing: 4) {
+        VStack(spacing: largeStyle ? 6 : 4) {
             Text("\(day)")
-                .font(.subheadline)
+                .font(largeStyle ? .headline : .subheadline)
                 .fontWeight(isToday && inMonth ? .bold : .regular)
                 .foregroundColor(inMonth ? .primary : .gray)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 6)
+                .padding(.top, largeStyle ? 8 : 6)
 
-            // 有紀錄顯示小圓點
             Circle()
                 .fill(hasRecord ? Color.green : Color.clear)
-                .frame(width: 6, height: 6)
+                .frame(width: largeStyle ? 8 : 6, height: largeStyle ? 8 : 6)
                 .opacity(inMonth ? 1 : 0)
-                .padding(.bottom, 6)
+                .padding(.bottom, largeStyle ? 8 : 6)
         }
-        .frame(height: 48)
+        .frame(height: largeStyle ? 64 : 48)
         .frame(maxWidth: .infinity)
         .background(
             ZStack {
                 if isToday && inMonth {
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.blue, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: largeStyle ? 10 : 8)
+                        .stroke(Color.blue, lineWidth: largeStyle ? 1.5 : 1)
                         .opacity(0.8)
                 }
             }
@@ -354,7 +374,6 @@ struct DailyMoodSheetView: View {
                     .alert("You haven't set any mood!", isPresented: $showAlert) {
                         Button("OK", role: .cancel) {}
                     }
-                    // 確認提示
                     .alert(isPresented: $showConfirm) {
                         AlertHelper.confirmAlert(
                             title: "Saved",
@@ -368,7 +387,6 @@ struct DailyMoodSheetView: View {
                 .padding(.vertical)
             }
             .onAppear {
-                // 確保載入該日期的最新資料
                 dailyRecord = dataManager.dailyRecord(for: date)
             }
             .toolbar {
@@ -385,8 +403,11 @@ struct DailyMoodSheetView: View {
             showAlert = true
         } else {
             dataManager.save(record: dailyRecord)
-            // 顯示確認視窗，點擊確認後關閉
             showConfirm = true
         }
     }
+}
+
+#Preview {
+    HomeView() // Preview Home to test tab interaction
 }

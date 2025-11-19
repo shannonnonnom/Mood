@@ -11,7 +11,7 @@ import SwiftUI
 struct MoodSketchApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeView() // ← 替換 ContentView
+            HomeView() 
         }
     }
 }

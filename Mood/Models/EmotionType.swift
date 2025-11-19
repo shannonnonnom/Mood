@@ -23,16 +23,6 @@ enum EmotionType: String, CaseIterable, Codable {
         }
     }
     
-    var emoji: String {
-        switch self {
-        case .happy: return "😊"
-        case .sad: return "😢"
-        case .angry: return "😡"
-        case .surprised: return "😲"
-        case .fear: return "😱"
-        case .disgust: return "🤢"
-        case .calm: return "😌"
-        case .excited: return "🤩"
+   
         }
-    }
-}
+
