@@ -13,8 +13,7 @@ class CalendarViewModel: ObservableObject {
     @Published var selectedDate = Date()
     @Published var showDailySheet = false
 
-    // Keep a reference to the shared manager. Views observing this VM will update
-    // when data is fetched via the manager or when you mutate @Published state here.
+   
     let dataManager = EmotionDataManager.shared
 
     init() { }

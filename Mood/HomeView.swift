@@ -13,16 +13,24 @@ struct HomeView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             CalendarView()
-            
                 .tabItem {
                     Image(systemName: "calendar")
                     Text("Calendar")
                 }
                 .tag(0)
             
-            
-    
-            BackgroundTab(imageName: "CalendarBackground-2") {
+            // 直接在 Reflection 分頁內鋪背景，避免影響其他分頁
+            ZStack {
+                Image("CalendarBackground-4")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .containerRelativeFrame(.horizontal)
+                    .overlay(
+                        Color.black.opacity(0.12).ignoresSafeArea()
+                    )
+                
+                // 內容保持透明，讓背景透出
                 ReflectionListView()
                     .background(Color.clear)
             }
@@ -32,7 +40,6 @@ struct HomeView: View {
             }
             .tag(1)
             
-            // 分頁 3：Summary（維持原樣，無背景圖）
             MonthlySummaryView()
                 .tabItem {
                     Image(systemName: "chart.bar")
@@ -49,28 +56,20 @@ private struct BackgroundTab<Content: View>: View {
     
     var body: some View {
         ZStack {
-            // 背景圖層
             Image(imageName)
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
             
-            // 可讀性遮罩（可調整或移除）
             Rectangle()
                 .fill(Color.black.opacity(0.12))
                 .ignoresSafeArea()
+                .allowsHitTesting(false)
             
-            // 內容
             content()
                 .background(Color.clear)
+                .zIndex(1)
         }
-        // 再加一層背景，避免個別容器有自身背景時蓋掉
-        .background(
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-        )
     }
 }
 

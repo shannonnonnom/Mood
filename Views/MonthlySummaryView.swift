@@ -17,51 +17,59 @@ struct MonthlySummaryView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            // 僅選擇「月份」：用 DatePicker 維持最少 UI，但將值正規化為該月第一天
-            HStack {
-                Text("Select Month")
-                Spacer()
-                // 顯示為「MMMM yyyy」，避免給人選日期的感覺
-                Menu(monthStart.monthString()) {
-                    // 提供近 24 個月的選項
-                    ForEach(monthOptions, id: \.self) { month in
-                        Button(month.monthString()) {
-                            selectedMonth = month
+        ZStack {
+            // 背景-4
+            Image("CalendarBackground-4")
+                .resizable()
+                .scaledToFill()
+                .containerRelativeFrame(.horizontal)
+                .ignoresSafeArea()
+                .overlay(
+                    Color.white.opacity(0.28).ignoresSafeArea()
+                )
+            
+            VStack(spacing: 20) {
+                HStack {
+                    Text("Select Month")
+                    Spacer()
+                    Menu(monthStart.monthString()) {
+                        ForEach(monthOptions, id: \.self) { month in
+                            Button(month.monthString()) {
+                                selectedMonth = month
+                            }
                         }
                     }
                 }
+                .padding(.horizontal)
+                .padding(.top)
+                
+                // 心情統計圖表
+                MoodChartView(month: monthStart)
+                    .frame(height: 300)
+                
+                // 小語
+                Text(dataManager.smallMessage(for: monthStart))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding()
             }
-            .padding(.horizontal)
-            .padding(.top)
-            
-            // 心情統計圖表
-            MoodChartView(month: monthStart)
-                .frame(height: 300)
-            
-            // 自動生成小語
-            Text(dataManager.smallMessage(for: monthStart))
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .padding()
-        }
-        .navigationTitle("Monthly Summary")
-        .onAppear {
-            normalizeSelectedMonth()
-        }
-        .onChange(of: selectedMonth) { _ in
-            normalizeSelectedMonth()
+            .navigationTitle("Monthly Summary")
+            .onAppear {
+                normalizeSelectedMonth()
+            }
+            .onChange(of: selectedMonth) { _ in
+                normalizeSelectedMonth()
+            }
         }
     }
     
-    // 提供最近 24 個月的清單（含本月）
     private var monthOptions: [Date] {
         let cal = Calendar.current
         let now = Date()
         let startOfThisMonth = cal.date(from: cal.dateComponents([.year, .month], from: now)) ?? now
         return (0..<24).compactMap { offset in
             cal.date(byAdding: .month, value: -offset, to: startOfThisMonth)
-        }.reversed() // 讓較新的月份在下方或依需求調整
+        }.reversed()
     }
     
     private func normalizeSelectedMonth() {
@@ -104,3 +112,4 @@ struct MoodChartView: View {
         .animation(.easeInOut(duration: 0.5), value: summary)
     }
 }
+

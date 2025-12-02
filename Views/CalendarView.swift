@@ -15,7 +15,7 @@ struct CalendarView: View {
     @ObservedObject var dataManager = EmotionDataManager.shared
 
     private let columns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 6), count: 7)
-    private let weekSymbols = Calendar.current.shortWeekdaySymbols // ["Sun","Mon",...]
+    private let weekSymbols = Calendar.current.shortWeekdaySymbols
 
     var body: some View {
         ZStack {
@@ -35,7 +35,7 @@ struct CalendarView: View {
                             VStack(spacing: 24) {
                                 Spacer(minLength: 60)
 
-                                // 置中顯示且按鈕不再撐滿寬度
+                               
                                 HStack {
                                     Spacer()
                                     Button(action: {
@@ -63,23 +63,32 @@ struct CalendarView: View {
                                         proxy.scrollTo("CalendarSection", anchor: .top)
                                     }
                                 } label: {
-                                    HStack(spacing: 6) {
+                                    HStack(spacing: 8) {
                                         Text("Choose another day")
-                                        Image(systemName: "arrow.down")
+                                            .font(.body.weight(.semibold))
+                                        Image(systemName: "arrow.down.circle.fill")
+                                            .font(.body.bold())
                                     }
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(.orange)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(
+                                        Capsule().fill(
+                                            Color(red: 0.98, green: 0.69, blue: 0.35).opacity(0.8) //
+                                        )
+                                    )
+                                    .shadow(color: Color.black.opacity(0.18), radius: 6, x: 0, y: 3)
                                 }
                                 .contentShape(Rectangle())
 
                                 Spacer()
                             }
-                            .frame(minHeight: UIScreen.main.bounds.height * 0.85) // 幾乎滿版
+                            .frame(minHeight: UIScreen.main.bounds.height * 0.85)
                             .frame(maxWidth: .infinity)
                         }
                         .id("TopSection")
 
-                        // Page 2: 月曆（置中並放大）- 使用 CalendarBackground-2
+                       
                         ZStack {
                             Image("CalendarBackground-2")
                                 .resizable()
@@ -93,7 +102,7 @@ struct CalendarView: View {
                                 Spacer(minLength: 20)
 
                                 VStack(spacing: 16) {
-                                    // 月份切換列
+                                    
                                     HStack {
                                         Button {
                                             changeMonth(by: -1)
@@ -115,7 +124,7 @@ struct CalendarView: View {
                                     .padding(.horizontal)
                                     .padding(.top, 8)
 
-                                    // 週標題
+                                    
                                     HStack {
                                         ForEach(weekSymbols, id: \.self) { symbol in
                                             Text(symbol)
@@ -126,7 +135,7 @@ struct CalendarView: View {
                                     }
                                     .padding(.horizontal, 6)
 
-                                    // 月曆網格（加大 spacing）
+                                   
                                     LazyVGrid(columns: columns, spacing: 12) {
                                         ForEach(daysForMonth(currentMonth), id: \.self) { day in
                                             DayCellView(
@@ -151,14 +160,24 @@ struct CalendarView: View {
                                             proxy.scrollTo("TopSection", anchor: .top)
                                         }
                                     } label: {
-                                        HStack(spacing: 6) {
-                                            Image(systemName: "arrow.up")
-                                            Text("Back to Today quick entry")
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "arrow.up.circle.fill")
+                                                .font(.body.bold())
+                                            Text("Back to Today")
+                                                .font(.body.weight(.semibold))
                                         }
-                                        .font(.footnote.weight(.semibold))
-                                        .foregroundColor(.blue)
-                                        .padding(.vertical, 8)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 10)
+                                        .background(
+                                            Capsule().fill(Color(red: 0.46, green: 0.78, blue: 0.64))
+                                        )
+                                        .shadow(color: Color.black.opacity(0.18), radius: 6, x: 0, y: 3)
                                     }
+                                    .padding(.top, 4)
+                                    .padding(.bottom, 12)
+                                    .zIndex(10)
+                                    .accessibilityLabel("Back to Today")
                                 }
 
                                 Spacer(minLength: 20)
@@ -167,10 +186,13 @@ struct CalendarView: View {
                             .frame(maxWidth: .infinity)
                         }
                         .id("CalendarSection")
+                       
+                        .safeAreaInset(edge: .bottom) {
+                            Color.clear
+                                .frame(height: 28)
+                        }
                     }
-                    // 隱藏 ScrollView 預設背景
                     .scrollContentBackground(.hidden)
-                    // 用 -1 當整個 ScrollView 的底層背景，補滿導航標題下的空白
                     .background(
                         Image("CalendarBackground-1")
                             .resizable()
