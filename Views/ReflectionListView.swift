@@ -14,18 +14,7 @@ struct ReflectionListView: View {
 
     var body: some View {
         ZStack {
-          
-            Image("CalendarBackground-4")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .containerRelativeFrame(.horizontal)
-                .overlay(
-                    Color.black.opacity(0.12).ignoresSafeArea()
-                )
-
-           
-            NavigationView {
+            NavigationStack {
                 List(dataManager.recentRecords) { record in
                     Button(action: {
                         let fresh = dataManager.dailyRecord(for: record.date)
@@ -47,11 +36,18 @@ struct ReflectionListView: View {
                     }
                 }
                 .navigationTitle("Reflections")
-                
                 .scrollContentBackground(.hidden)
-                .background(Color.clear)
+                .background(
+                    Image("CalendarBackground-4")
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+                        .containerRelativeFrame(.horizontal)
+                        .overlay(
+                            Color.black.opacity(0.12).ignoresSafeArea()
+                        )
+                )
                 .onAppear {
-                    
                     let appearance = UINavigationBarAppearance()
                     appearance.configureWithTransparentBackground()
                     UINavigationBar.appearance().standardAppearance = appearance
@@ -63,19 +59,6 @@ struct ReflectionListView: View {
         .sheet(isPresented: $showDetail) {
             if let record = selectedRecord {
                 ReflectionDetailView(dailyRecord: record)
-                    .background(
-                        ZStack {
-                            
-                            Image("CalendarBackground-4")
-                                .resizable()
-                                .scaledToFill()
-                                .ignoresSafeArea()
-                                .containerRelativeFrame(.horizontal)
-                                .overlay(
-                                    Color.black.opacity(0.12).ignoresSafeArea()
-                                )
-                        }
-                    )
             }
         }
     }
@@ -87,54 +70,50 @@ struct ReflectionDetailView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        ZStack {
-            
-            Image("CalendarBackground-4")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .containerRelativeFrame(.horizontal)
-                .overlay(
-                    Color.black.opacity(0.12).ignoresSafeArea()
-                )
-            
-            NavigationView {
-                VStack(spacing: 20) {
-                    Text("Edit Your Reflection")
-                        .font(.headline)
-                    
-                    TextEditor(text: $dailyRecord.notes)
-                        .frame(height: 150)
-                        .border(Color.gray)
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Edit Your Reflection")
+                    .font(.headline)
+                
+                TextEditor(text: $dailyRecord.notes)
+                    .frame(height: 150)
+                    .border(Color.gray)
+                    .padding(.horizontal)
+                
+                Toggle("Private", isOn: $dailyRecord.isPrivate)
+                    .padding(.horizontal)
+                
+                Spacer()
+                
+                Button(action: saveRecord) {
+                    Text("Save")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 3)
                         .padding(.horizontal)
-                    
-                    Toggle("Private", isOn: $dailyRecord.isPrivate)
-                        .padding(.horizontal)
-                    
-                    Spacer()
-                    
-                    Button(action: saveRecord) {
-                        Text("Save")
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.green)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .shadow(radius: 3)
-                            .padding(.horizontal)
-                    }
-                }
-                .navigationTitle(dailyRecord.dateString)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Close") { dismiss() }
-                    }
                 }
             }
-            .background(Color.clear)
+            .navigationTitle(dailyRecord.dateString)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
+                }
+            }
+            .background(
+                Image("CalendarBackground-4")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .containerRelativeFrame(.horizontal)
+                    .overlay(
+                        Color.black.opacity(0.12).ignoresSafeArea()
+                    )
+            )
         }
         .onAppear {
-            // 開啟時刷新最新內容
             dailyRecord = dataManager.dailyRecord(for: dailyRecord.date)
         }
     }
